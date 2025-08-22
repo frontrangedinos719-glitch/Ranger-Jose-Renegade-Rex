@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renegade Rex</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 70%, #8FBC8F 100%);
+            overflow: hidden;
+            height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #2E8B57, #228B22);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px #000;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .instructions {
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            max-width: 500px;
+        }
+
+        .demo-area {
+            width: 100%;
+            height: 100px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+            border: 3px solid #fff;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .start-button {
+            background: #FF6B35;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .start-button:hover {
+            background: #FF5722;
+            transform: translateY(-2px);
+        }
+
+        .game-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .background-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background-repeat: repeat-x;
+        }
+
+        .tree {
+            position: absolute;
+            bottom: 150px;
+            z-index: 10;
+            opacity: 0.7;
+        }
+
+        .tree-small {
+            font-size: 2rem;
+        }
+
+        .tree-medium {
+            font-size: 3rem;
+        }
+
+        .tree-large {
+            font-size: 4rem;
+        }
+
+        .mountain-backdrop {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 15rem;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        .brush {
+            position: absolute;
+            bottom: 150px;
+            z-index: 15;
+            opacity: 0.8;
+        }
+
+        .brush-small {
+            font-size: 1.5rem;
+        }
+
+        .brush-medium {
+            font-size: 2rem;
+        }
+
+        .brush-large {
+            font-size: 2.5rem;
+        }
+
+        .clouds-back {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 20"><text y="15" font-size="24">☁️</text></svg>') repeat-x;
+            background-size: 400px 60px;
+            top: 10%;
+            opacity: 0.6;
+            z-index: 5;
+        }
+
+        .clouds-mid {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 20"><text y="15" font-size="20">☁️</text></svg>') repeat-x;
+            background-size: 300px 50px;
+            top: 20%;
+            opacity: 0.7;
+            z-index: 6;
+        }
+
+        .clouds-front {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 20"><text y="15" font-size="16">☁️</text></svg>') repeat-x;
+            background-size: 200px 40px;
+            top: 30%;
+            opacity: 0.8;
+            z-index: 7;
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            background: #8FBC8F;
+            z-index: 40;
+        }
+
+        .jeep {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(-1);
+            font-size: 6rem;
+            z-index: 100;
+            transition: bottom 0.3s ease;
+            animation: jeepHop 0.8s infinite;
+        }
+
+        @keyframes jeepHop {
+            0%, 100% { transform: translateX(-50%) scaleX(-1) translateY(0); }
+            50% { transform: translateX(-50%) scaleX(-1) translateY(-8px); }
+        }
+
+        .trex {
+            position: absolute;
+            bottom: 150px;
+            left: 20%;
+            font-size: 8rem;
+            z-index: 99;
+            transition: left 0.5s ease;
+            transform: scaleX(-1);
+        }
+
+        .obstacle {
+            position: absolute;
+            bottom: 150px;
+            font-size: 2rem;
+            z-index: 110;
+        }
+
+        .pterodactyl {
+            position: absolute;
+            bottom: 220px;
+            font-size: 2.5rem;
+            z-index: 110;
+        }
+
+        .egg {
+            position: absolute;
+            bottom: 170px;
+            font-size: 2rem;
+            z-index: 110;
+            animation: bounce 1s infinite;
+        }
+
+        .mute-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 200;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px #000;
+            z-index: 200;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            z-index: 300;
+        }
+
+        .restart-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        /* Mobile and Tablet Responsive Styles */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .instructions {
+                font-size: 0.9rem;
+                padding: 15px;
+            }
+            
+            .jeep {
+                font-size: 4rem;
+            }
+            
+            .trex {
+                font-size: 6rem;
+            }
+            
+            .hud {
+                font-size: 1rem;
+            }
+            
+            .mute-button {
+                font-size: 1.2rem;
+                padding: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.5rem;
+            }
+            
+            .jeep {
+                font-size: 3rem;
+            }
+            
+            .trex {
+                font-size: 4.5rem;
+            }
+            
+            .hud {
+                font-size: 0.9rem;
+                top: 10px;
+                left: 10px;
+            }
+            
+            .mute-button {
+                top: 10px;
+                right: 10px;
+                font-size: 1rem;
+            }
+            
+            #fullscreenButton {
+                right: 60px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Start Screen -->
+        <div class="start-screen" id="startScreen">
+            <h1 class="title">🦕 RENEGADE REX 🚙</h1>
+            <h2 style="font-size: 1.5rem; margin-bottom: 20px; text-shadow: 2px 2px 0px #000;">Ranger Jose</h2>
+            <p class="subtitle">Help Ranger Jose lure a renegade T-Rex back to its cage at Front Range Dinosaur Park in Colorado!</p>
+            
+            <div class="instructions">
+                <h3>🎮 How to Play:</h3>
+                <p>• Press UP ARROW or TAP to make the jeep jump</p>
+                <p>• Avoid rocks ⛰️ and eagles 🦅</p>
+                <p>• Collect dino eggs 🥚 to push T-Rex back</p>
+                <p>• 3 hits and the T-Rex catches you!</p>
+                <p>• Score = Distance covered in meters</p>
+            </div>
+
+            <div class="demo-area" id="demoArea">
+                <!-- Demo animation will play here -->
+            </div>
+
+            <button class="start-button" onclick="startGame()">🚀 START ADVENTURE</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <!-- Background Layers -->
+            <div class="background-layer clouds-back" id="cloudsBack"></div>
+            <div class="background-layer clouds-mid" id="cloudsMid"></div>
+            <div class="background-layer clouds-front" id="cloudsFront"></div>
+            
+            <!-- Mountain Backdrop -->
+            <div class="mountain-backdrop">🏔️</div>
+            
+            <!-- Additional Mountains for Range -->
+            <div style="position: absolute; bottom: 150px; left: 60%; transform: translateX(-50%); font-size: 12rem; z-index: 1; opacity: 0.25;">🏔️</div>
+            <div style="position: absolute; bottom: 150px; left: 40%; transform: translateX(-50%); font-size: 10rem; z-index: 1; opacity: 0.2;">🏔️</div>
+            
+            <!-- Forest Trees -->
+            <div id="forestTrees"></div>
+            
+            <!-- Brush Layer -->
+            <div id="brushLayer"></div>
+
+            <!-- Ground -->
+            <div class="ground"></div>
+
+            <!-- Game Elements -->
+            <div class="jeep" id="jeep">🚙</div>
+            <div class="trex" id="trex">🦖</div>
+
+            <!-- Control Buttons -->
+            <button class="mute-button" id="muteButton" onclick="toggleMute()">🔊</button>
+            <button class="mute-button" id="fullscreenButton" onclick="toggleFullscreen()" style="right: 80px;">⛶</button>
+
+            <!-- HUD -->
+            <div class="hud">
+                <div>Distance: <span id="distance">0</span>m</div>
+                <div>Lives: <span id="lives">❤️❤️❤️</span></div>
+                <div>Speed: <span id="speed">1</span>x</div>
+                <div>Difficulty: <span id="difficulty">Easy</span></div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div class="game-over" id="gameOver">
+                <h2>🦖 T-REX CAUGHT YOU! 🦖</h2>
+                <p>Final Distance: <span id="finalDistance">0</span> meters</p>
+                <button class="restart-button" onclick="restartGame()">🔄 Try Again</button>
+                <button class="restart-button" onclick="goToMenu()">🏠 Main Menu</button>
+            </div>
+
+            <!-- Victory Screen -->
+            <div class="game-over" id="victoryScreen" style="background: rgba(0,100,0,0.9);">
+                <h2>🎉 CONGRATULATIONS! 🎉</h2>
+                <h3>You Successfully Lured the T-Rex Home!</h3>
+                <p>The T-Rex is safely back in its cage at Front Range Dinosaur Park!</p>
+                <p>Final Distance: 12,000 meters</p>
+                <button class="restart-button" onclick="restartGame()">🔄 Play Again</button>
+                <button class="restart-button" onclick="goToMenu()">🏠 Main Menu</button>
+            </div>
+
+            <!-- Cage (hidden initially) -->
+            <div id="cage" style="display: none; position: absolute; bottom: 350px; left: 40%; transform: translateX(-50%); z-index: 120;">
+                <div style="position: relative; font-size: 12rem;">
+                    <div style="position: absolute; top: 0; left: 0;">☒</div>
+                    <div style="position: absolute; top: 20px; left: 10px;">⩩</div>
+                    <div style="position: absolute; top: calc(50% + 115px); left: calc(50% + 75px); transform: translate(-50%, -50%); font-size: 3rem; z-index: 121;">⛓️</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            isPlaying: false,
+            distance: 0,
+            lives: 3,
+            speed: 1,
+            jeepY: 0,
+            trexX: 20,
+            obstacles: [],
+            pterodactyls: [],
+            eggs: [],
+            lastObstacle: 0,
+            lastEgg: 0,
+            backgroundOffsets: {
+                cloudsBack: 0,
+                cloudsMid: 0,
+                cloudsFront: 0
+            },
+            trexBob: 0,
+            invulnerable: false,
+            musicMuted: false,
+            trees: [],
+            brush: [],
+            obstacleCount: 0
+        };
+
+        let keys = {};
+        let gameLoop;
+        let demoLoop;
+        let backgroundMusic;
+
+        // Audio Context for sound effects
+        let audioContext;
+        let sounds = {};
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                createSounds();
+                createBackgroundMusic();
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        function createSounds() {
+            // Jump sound
+            sounds.jump = createBeep(300, 0.1, 'sine');
+            // Hit sound (T-Rex roar)
+            sounds.hit = createBeep(100, 0.5, 'sawtooth');
+            // Egg collect sound
+            sounds.egg = createBeep(600, 0.2, 'sine');
+        }
+
+        function createBeep(frequency, duration, type = 'sine') {
+            return function() {
+                if (!audioContext) return;
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            };
+        }
+
+        function createBackgroundMusic() {
+            if (!audioContext) return;
+            
+            // Create a simple Jurassic-like theme
+            const notes = [220, 246.94, 261.63, 293.66, 329.63, 349.23, 392, 440];
+            let noteIndex = 0;
+            
+            function playNextNote() {
+                if (gameState.musicMuted || !gameState.isPlaying) {
+                    setTimeout(playNextNote, 500);
+                    return;
+                }
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = notes[noteIndex];
+                oscillator.type = 'triangle';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.8);
+                
+                noteIndex = (noteIndex + 1) % notes.length;
+                setTimeout(playNextNote, 1000);
+            }
+            
+            playNextNote();
+        }
+
+        function createForest() {
+            const forestContainer = document.getElementById('forestTrees');
+            forestContainer.innerHTML = '';
+            gameState.trees = [];
+
+            // Create dense forest with overlapping trees
+            for (let i = 0; i < 200; i++) {
+                const tree = document.createElement('div');
+                tree.innerHTML = '🌲';
+                tree.className = 'tree';
+                
+                // Random size
+                const sizes = ['tree-small', 'tree-medium', 'tree-large'];
+                const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+                tree.classList.add(randomSize);
+                
+                // Random horizontal position (allow overlap)
+                const x = Math.random() * (window.innerWidth * 3); // Spread across wider area
+                tree.style.left = x + 'px';
+                
+                // Slight random vertical offset for natural look
+                const yOffset = Math.random() * 20 - 10;
+                tree.style.bottom = (150 + yOffset) + 'px';
+                
+                forestContainer.appendChild(tree);
+                gameState.trees.push({
+                    element: tree,
+                    x: x,
+                    originalX: x
+                });
+            }
+        }
+
+        function createBrush() {
+            const brushContainer = document.getElementById('brushLayer');
+            brushContainer.innerHTML = '';
+            gameState.brush = [];
+
+            // Create brush layer in front of trees
+            for (let i = 0; i < 150; i++) {
+                const brush = document.createElement('div');
+                brush.innerHTML = '🌿';
+                brush.className = 'brush';
+                
+                // Random size
+                const sizes = ['brush-small', 'brush-medium', 'brush-large'];
+                const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+                brush.classList.add(randomSize);
+                
+                // Random horizontal position (allow overlap)
+                const x = Math.random() * (window.innerWidth * 3);
+                brush.style.left = x + 'px';
+                
+                // Random horizontal flip
+                if (Math.random() > 0.5) {
+                    brush.style.transform = 'scaleX(-1)';
+                }
+                
+                // Slight random vertical offset
+                const yOffset = Math.random() * 20 - 10;
+                brush.style.bottom = (150 + yOffset) + 'px';
+                
+                brushContainer.appendChild(brush);
+                gameState.brush.push({
+                    element: brush,
+                    x: x,
+                    originalX: x
+                });
+            }
+        }
+
+        function updateTrees() {
+            gameState.trees.forEach(tree => {
+                tree.x -= 3 * gameState.speed; // Much faster movement
+                tree.element.style.left = tree.x + 'px';
+                
+                // Reset tree position when it goes off screen
+                if (tree.x < -100) {
+                    tree.x = window.innerWidth + Math.random() * 200;
+                    tree.originalX = tree.x;
+                }
+            });
+        }
+
+        function updateBrush() {
+            gameState.brush.forEach(brush => {
+                brush.x -= 4 * gameState.speed; // Slightly faster than trees
+                brush.element.style.left = brush.x + 'px';
+                
+                // Reset brush position when it goes off screen
+                if (brush.x < -100) {
+                    brush.x = window.innerWidth + Math.random() * 200;
+                    brush.originalX = brush.x;
+                }
+            });
+        }
+
+        function toggleMute() {
+            gameState.musicMuted = !gameState.musicMuted;
+            document.getElementById('muteButton').textContent = gameState.musicMuted ? '🔇' : '🔊';
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Error attempting to enable fullscreen:', err);
+                });
+                document.getElementById('fullscreenButton').textContent = '⛶';
+            } else {
+                document.exitFullscreen();
+                document.getElementById('fullscreenButton').textContent = '⛶';
+            }
+        }
+
+        // Update fullscreen button when fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            const button = document.getElementById('fullscreenButton');
+            if (button) {
+                button.textContent = document.fullscreenElement ? '⛶' : '⛶';
+            }
+        });
+
+        // Event Listeners
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            if (e.code === 'ArrowUp' || e.code === 'Space') {
+                e.preventDefault();
+                jump();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        document.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            jump();
+        });
+
+        // Prevent zoom on double tap
+        document.addEventListener('touchend', (e) => {
+            e.preventDefault();
+        });
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                // Force a resize event to recalculate positions
+                window.dispatchEvent(new Event('resize'));
+            }, 100);
+        });
+
+        function jump() {
+            if (!gameState.isPlaying) return;
+            
+            const jeep = document.getElementById('jeep');
+            if (gameState.jeepY === 0) {
+                gameState.jeepY = 100;
+                jeep.style.bottom = (150 + gameState.jeepY) + 'px';
+                
+                if (sounds.jump) sounds.jump();
+                
+                setTimeout(() => {
+                    gameState.jeepY = 0;
+                    jeep.style.bottom = '150px';
+                }, 400);
+            }
+        }
+
+        function startDemo() {
+            const demoArea = document.getElementById('demoArea');
+            let demoElements = [];
+            
+            // Create demo elements - T-Rex on left chasing jeep on right
+            const demoTrex = document.createElement('div');
+            demoTrex.innerHTML = '🦖';
+            demoTrex.style.position = 'absolute';
+            demoTrex.style.left = '20px';
+            demoTrex.style.bottom = '15px';
+            demoTrex.style.fontSize = '2.5rem';
+            demoTrex.style.transform = 'scaleX(-1)';
+            demoArea.appendChild(demoTrex);
+
+            const demoJeep = document.createElement('div');
+            demoJeep.innerHTML = '🚙';
+            demoJeep.style.position = 'absolute';
+            demoJeep.style.left = '120px';
+            demoJeep.style.bottom = '20px';
+            demoJeep.style.fontSize = '2rem';
+            demoJeep.style.transform = 'scaleX(-1)';
+            demoArea.appendChild(demoJeep);
+
+            function createDemoObstacle() {
+                const obstacle = document.createElement('div');
+                obstacle.innerHTML = Math.random() > 0.5 ? '⛰️' : '🦅';
+                obstacle.style.position = 'absolute';
+                obstacle.style.right = '-30px';
+                obstacle.style.bottom = obstacle.innerHTML === '🦅' ? '40px' : '20px';
+                obstacle.style.fontSize = '1.5rem';
+                demoArea.appendChild(obstacle);
+                demoElements.push(obstacle);
+            }
+
+            demoLoop = setInterval(() => {
+                // Move obstacles from right to left
+                demoElements.forEach((element, index) => {
+                    const currentRight = parseInt(element.style.right) || 0;
+                    element.style.right = (currentRight + 3) + 'px';
+                    
+                    if (currentRight > demoArea.offsetWidth + 50) {
+                        element.remove();
+                        demoElements.splice(index, 1);
+                    }
+                });
+
+                // Create new obstacles
+                if (Math.random() < 0.02) {
+                    createDemoObstacle();
+                }
+
+                // Animate jeep jump
+                if (Math.random() < 0.03) {
+                    demoJeep.style.bottom = '40px';
+                    setTimeout(() => {
+                        demoJeep.style.bottom = '20px';
+                    }, 300);
+                }
+
+                // Move T-Rex closer occasionally
+                if (Math.random() < 0.01) {
+                    demoTrex.style.left = '60px';
+                    setTimeout(() => {
+                        demoTrex.style.left = '20px';
+                    }, 1000);
+                }
+            }, 50);
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            if (demoLoop) clearInterval(demoLoop);
+            initAudio();
+            createForest();
+            createBrush();
+            
+            // Reset game state
+            gameState = {
+                isPlaying: true,
+                distance: 0,
+                lives: 3,
+                speed: 1,
+                jeepY: 0,
+                trexX: 20,
+                obstacles: [],
+                pterodactyls: [],
+                eggs: [],
+                lastObstacle: 0,
+                lastEgg: 0,
+                backgroundOffsets: {
+                    cloudsBack: 0,
+                    cloudsMid: 0,
+                    cloudsFront: 0
+                },
+                trexBob: 0,
+                invulnerable: false,
+                musicMuted: false,
+                trees: gameState.trees,
+                brush: gameState.brush,
+                victory: false,
+                obstacleCount: 0
+            };
+
+            updateHUD();
+            gameLoop = setInterval(updateGame, 50);
+        }
+
+        function updateGame() {
+            if (!gameState.isPlaying) return;
+
+            // Update distance and speed
+            gameState.distance += gameState.speed;
+            gameState.speed = 1 + Math.floor(gameState.distance / 2000) * 0.2;
+
+            // Update background parallax with different speeds
+            gameState.backgroundOffsets.cloudsBack -= 0.2 * gameState.speed;
+            gameState.backgroundOffsets.cloudsMid -= 0.5 * gameState.speed;
+            gameState.backgroundOffsets.cloudsFront -= 0.8 * gameState.speed;
+
+            // Apply background movement
+            document.getElementById('cloudsBack').style.backgroundPosition = gameState.backgroundOffsets.cloudsBack + 'px 0';
+            document.getElementById('cloudsMid').style.backgroundPosition = gameState.backgroundOffsets.cloudsMid + 'px 0';
+            document.getElementById('cloudsFront').style.backgroundPosition = gameState.backgroundOffsets.cloudsFront + 'px 0';
+
+            // Update trees and brush
+            updateTrees();
+            updateBrush();
+
+            // T-Rex bobbing animation
+            gameState.trexBob += 0.3;
+            const trex = document.getElementById('trex');
+            const bobOffset = Math.sin(gameState.trexBob) * 5;
+            trex.style.bottom = (150 + bobOffset) + 'px';
+
+            // Spawn obstacles - gets progressively harder much faster
+            const baseSpawnDistance = 150;
+            const randomVariation = Math.random() * 100; // Reduced variation for more consistent difficulty
+            const difficultyReduction = Math.min(gameState.distance / 50, 140); // Much faster difficulty increase
+            const spawnDistance = Math.max(baseSpawnDistance + randomVariation - difficultyReduction, 30); // Minimum 30 units apart
+            
+            if (gameState.distance - gameState.lastObstacle > spawnDistance) {
+                spawnObstacle();
+                gameState.lastObstacle = gameState.distance;
+            }
+
+            // Spawn eggs every 1000m
+            if (gameState.distance - gameState.lastEgg > 1000) {
+                spawnEgg();
+                gameState.lastEgg = gameState.distance;
+            }
+
+            // Update all game objects
+            updateObstacles();
+            updateEggs();
+            checkCollisions();
+            updateHUD();
+
+            // Show cage at 11,800 meters (200m before finish)
+            if (gameState.distance >= 11800 && !document.getElementById('cage').style.display === 'block') {
+                document.getElementById('cage').style.display = 'block';
+            }
+
+            // Check victory condition at 12,000 meters
+            if (gameState.distance >= 12000 && !gameState.victory) {
+                victory();
+                return;
+            }
+
+            // Check if T-Rex caught the jeep
+            if (gameState.trexX >= 45) {
+                gameOver();
+            }
+        }
+
+        function spawnObstacle() {
+            // Alternate between mountain and pterodactyl: even count = mountain, odd count = bird
+            const isMountain = gameState.obstacleCount % 2 === 0;
+            
+            if (isMountain) {
+                // Check if this is every third mountain (every 6th obstacle total)
+                const isThirdMountain = Math.floor(gameState.obstacleCount / 2) % 3 === 2;
+                
+                // Spawn single mountain
+                const obstacle = {
+                    x: window.innerWidth + (isThirdMountain ? (Math.random() > 0.5 ? 60 : -60) : 0),
+                    type: 'mountain',
+                    element: null
+                };
+
+                const div = document.createElement('div');
+                div.innerHTML = '⛰️';
+                div.className = 'obstacle';
+                div.style.left = obstacle.x + 'px';
+
+                document.getElementById('gameScreen').appendChild(div);
+                obstacle.element = div;
+                gameState.obstacles.push(obstacle);
+            } else {
+                // Check if this is every third bird (every 6th obstacle total)
+                const isThirdBird = Math.floor(gameState.obstacleCount / 2) % 3 === 2;
+                
+                if (isThirdBird) {
+                    // Spawn two birds
+                    for (let i = 0; i < 2; i++) {
+                        const obstacle = {
+                            x: window.innerWidth + (i === 0 ? 0 : (Math.random() > 0.5 ? 150 : -150)),
+                            type: 'pterodactyl',
+                            element: null
+                        };
+
+                        const div = document.createElement('div');
+                        div.innerHTML = '🦅';
+                        div.className = 'pterodactyl';
+                        div.style.left = obstacle.x + 'px';
+
+                        document.getElementById('gameScreen').appendChild(div);
+                        obstacle.element = div;
+                        gameState.pterodactyls.push(obstacle);
+                    }
+                } else {
+                    // Spawn single bird
+                    const obstacle = {
+                        x: window.innerWidth,
+                        type: 'pterodactyl',
+                        element: null
+                    };
+
+                    const div = document.createElement('div');
+                    div.innerHTML = '🦅';
+                    div.className = 'pterodactyl';
+                    div.style.left = obstacle.x + 'px';
+
+                    document.getElementById('gameScreen').appendChild(div);
+                    obstacle.element = div;
+                    gameState.pterodactyls.push(obstacle);
+                }
+            }
+            
+            gameState.obstacleCount++;
+        }
+
+        function spawnEgg() {
+            const egg = {
+                x: window.innerWidth + 200,
+                element: null
+            };
+
+            const div = document.createElement('div');
+            div.innerHTML = '🥚';
+            div.className = 'egg';
+            div.style.left = egg.x + 'px';
+            
+            document.getElementById('gameScreen').appendChild(div);
+            egg.element = div;
+            gameState.eggs.push(egg);
+        }
+
+        function updateObstacles() {
+            [...gameState.obstacles, ...gameState.pterodactyls].forEach((obstacle, index, array) => {
+                obstacle.x -= 15 * gameState.speed;
+                obstacle.element.style.left = obstacle.x + 'px';
+
+                if (obstacle.x < -50) {
+                    obstacle.element.remove();
+                    const originalArray = obstacle.type === 'mountain' ? gameState.obstacles : gameState.pterodactyls;
+                    const idx = originalArray.indexOf(obstacle);
+                    if (idx > -1) originalArray.splice(idx, 1);
+                }
+            });
+        }
+
+        function updateEggs() {
+            gameState.eggs.forEach((egg, index) => {
+                egg.x -= 15 * gameState.speed;
+                egg.element.style.left = egg.x + 'px';
+
+                if (egg.x < -50) {
+                    egg.element.remove();
+                    gameState.eggs.splice(index, 1);
+                }
+            });
+        }
+
+        function checkCollisions() {
+            if (gameState.invulnerable) return;
+
+            const jeepRect = { x: window.innerWidth/2 - 20, y: 150 + gameState.jeepY, width: 40, height: 40 };
+
+            // Check obstacle collisions
+            [...gameState.obstacles, ...gameState.pterodactyls].forEach((obstacle, index) => {
+                const obstacleRect = { 
+                    x: obstacle.x, 
+                    y: obstacle.type === 'mountain' ? 150 : 220, 
+                    width: 40, 
+                    height: 40 
+                };
+
+                if (isColliding(jeepRect, obstacleRect)) {
+                    hit();
+                    obstacle.element.remove();
+                    const originalArray = obstacle.type === 'mountain' ? gameState.obstacles : gameState.pterodactyls;
+                    const idx = originalArray.indexOf(obstacle);
+                    if (idx > -1) originalArray.splice(idx, 1);
+                }
+            });
+
+            // Check egg collisions
+            gameState.eggs.forEach((egg, index) => {
+                const eggRect = { x: egg.x, y: 170, width: 30, height: 30 };
+
+                if (isColliding(jeepRect, eggRect)) {
+                    collectEgg();
+                    egg.element.remove();
+                    gameState.eggs.splice(index, 1);
+                }
+            });
+        }
+
+        function isColliding(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        function hit() {
+            gameState.lives--;
+            gameState.invulnerable = true;
+            
+            if (sounds.hit) sounds.hit();
+            
+            // Move T-Rex closer
+            gameState.trexX = Math.min(gameState.trexX + 8, 45);
+            document.getElementById('trex').style.left = gameState.trexX + '%';
+            
+            // Flash effect
+            const jeep = document.getElementById('jeep');
+            jeep.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                jeep.style.opacity = '1';
+                gameState.invulnerable = false;
+            }, 1000);
+
+            if (gameState.lives <= 0) {
+                gameOver();
+            }
+        }
+
+        function collectEgg() {
+            gameState.lives = Math.min(gameState.lives + 1, 3);
+            gameState.trexX = Math.max(gameState.trexX - 5, 20);
+            document.getElementById('trex').style.left = gameState.trexX + '%';
+            
+            if (sounds.egg) sounds.egg();
+        }
+
+        function updateHUD() {
+            document.getElementById('distance').textContent = Math.floor(gameState.distance);
+            document.getElementById('speed').textContent = gameState.speed.toFixed(1);
+            
+            let livesDisplay = '';
+            for (let i = 0; i < gameState.lives; i++) {
+                livesDisplay += '❤️';
+            }
+            document.getElementById('lives').textContent = livesDisplay;
+            
+            // Update difficulty based on distance
+            const distance = gameState.distance;
+            let difficulty = 'Easy';
+            if (distance > 5000) difficulty = 'Insane';
+            else if (distance > 4000) difficulty = 'Extreme';
+            else if (distance > 3000) difficulty = 'Very Hard';
+            else if (distance > 2000) difficulty = 'Hard';
+            else if (distance > 1000) difficulty = 'Medium';
+            
+            document.getElementById('difficulty').textContent = difficulty;
+        }
+
+        function victory() {
+            gameState.isPlaying = false;
+            gameState.victory = true;
+            clearInterval(gameLoop);
+            
+            // Cage should already be visible from 9,800m
+            document.getElementById('cage').style.display = 'block';
+            
+            // Animate T-Rex running into the cage
+            const trex = document.getElementById('trex');
+            trex.style.transition = 'left 1.5s ease-out';
+            trex.style.left = '40%'; // Same horizontal position as cage
+            
+            setTimeout(() => {
+                // T-Rex is now in the cage - hide behind bars
+                trex.style.bottom = '150px';
+                trex.style.zIndex = '115'; // Behind cage
+                trex.style.opacity = '0.7'; // Slightly transparent to show it's behind bars
+                
+                // Move jeep past the cage
+                const jeep = document.getElementById('jeep');
+                jeep.style.left = '60%';
+                jeep.style.animation = 'none'; // Stop hopping
+            }, 1500);
+            
+            // Show victory screen after animation completes
+            setTimeout(() => {
+                document.getElementById('victoryScreen').style.display = 'block';
+            }, 3000);
+        }
+
+        function gameOver() {
+            gameState.isPlaying = false;
+            clearInterval(gameLoop);
+            
+            document.getElementById('finalDistance').textContent = Math.floor(gameState.distance);
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('victoryScreen').style.display = 'none';
+            document.getElementById('cage').style.display = 'none';
+            
+            // Reset jeep and T-Rex positions and styles
+            const jeep = document.getElementById('jeep');
+            const trex = document.getElementById('trex');
+            jeep.style.left = '50%';
+            jeep.style.animation = 'jeepHop 0.8s infinite';
+            trex.style.zIndex = '99';
+            trex.style.opacity = '1';
+            trex.style.left = '20%';
+            trex.style.transition = 'left 0.5s ease'; // Reset to normal transition
+            
+            // Clear all game objects
+            [...gameState.obstacles, ...gameState.pterodactyls, ...gameState.eggs].forEach(obj => {
+                if (obj.element) obj.element.remove();
+            });
+
+            startGame();
+        }
+
+        function goToMenu() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('victoryScreen').style.display = 'none';
+            document.getElementById('cage').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+            
+            // Reset jeep and T-Rex positions and styles
+            const jeep = document.getElementById('jeep');
+            const trex = document.getElementById('trex');
+            jeep.style.left = '50%';
+            jeep.style.animation = 'jeepHop 0.8s infinite';
+            trex.style.zIndex = '99';
+            trex.style.opacity = '1';
+            trex.style.left = '20%';
+            trex.style.transition = 'left 0.5s ease'; // Reset to normal transition
+            
+            // Clear all game objects
+            [...gameState.obstacles, ...gameState.pterodactyls, ...gameState.eggs].forEach(obj => {
+                if (obj.element) obj.element.remove();
+            });
+
+            if (gameLoop) clearInterval(gameLoop);
+            startDemo();
+        }
+
+        // Start demo on page load
+        window.addEventListener('load', startDemo);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9730eb4a5362e769',t:'MTc1NTg1MDQ5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
