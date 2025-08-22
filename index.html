@@ -88,9 +88,11 @@
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             transition: all 0.3s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
-        .start-button:hover {
+        .start-button:hover, .start-button:active {
             background: #FF5722;
             transform: translateY(-2px);
         }
@@ -382,7 +384,7 @@
                 <!-- Demo animation will play here -->
             </div>
 
-            <button class="start-button" onclick="startGame()">🚀 START ADVENTURE</button>
+            <button class="start-button" onclick="startGame()" ontouchstart="startGame()">🚀 START ADVENTURE</button>
         </div>
 
         <!-- Game Screen -->
@@ -702,9 +704,12 @@
             jump();
         });
 
-        // Prevent zoom on double tap
+        // Prevent zoom on double tap but allow button clicks
         document.addEventListener('touchend', (e) => {
-            e.preventDefault();
+            // Don't prevent default on buttons to allow clicks
+            if (e.target.tagName !== 'BUTTON') {
+                e.preventDefault();
+            }
         });
 
         // Handle orientation changes
@@ -1204,5 +1209,6 @@
         // Start demo on page load
         window.addEventListener('load', startDemo);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9730eb4a5362e769',t:'MTc1NTg1MDQ5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97311b923306e65d',t:'MTc1NTg1MjQ3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
